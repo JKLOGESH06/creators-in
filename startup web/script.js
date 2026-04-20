@@ -98,6 +98,19 @@ async function navigateTo(route, param = null) {
 // Initial Load
 document.addEventListener('DOMContentLoaded', async () => {
     await injectContactInfo();
+
+    // Listen to Firebase Auth state
+    firebase.auth().onAuthStateChanged(async (user) => {
+        if (user && userRole === 'none') {
+            // Customer was previously logged in
+            isAuthenticated = true;
+            userRole = 'customer';
+            await navigateTo('home');
+        } else if (!user && userRole === 'none') {
+            navigateTo('login');
+        }
+    });
+
     navigateTo('login');
 });
 
@@ -188,7 +201,7 @@ function renderLogin(step = 'role', role = 'customer', isSignup = false) {
                     
                     <div id="login-error" style="color: #dc3545; margin-bottom: 1rem; display: none; font-size: 0.9rem; text-align: center; font-weight: 500;">Invalid email or password! Please try again.</div>
 
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <button type="submit" id="auth-submit-btn" class="btn btn-primary" style="width: 100%;">
                         ${isSignup ? 'Create Account' : 'Log In'}
                     </button>
                 </form>
@@ -214,18 +227,44 @@ function submitAuth(e, role, isSignup) {
             if(err) err.style.display = 'block';
         }
     } else {
+        const email = document.getElementById('auth-email').value;
+        const password = document.getElementById('auth-password').value;
+        const btn = document.querySelector('#auth-submit-btn');
+        if(btn) { btn.disabled = true; btn.textContent = 'Please wait...'; }
+
         if (isSignup) {
-            renderLogin('form', 'customer', false);
+            // Create new customer account in Firebase
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+                .then(async (userCredential) => {
+                    isAuthenticated = true;
+                    userRole = 'customer';
+                    // Save customer info to Firestore
+                    const name = document.querySelector('input[placeholder="YOUR NAME"]');
+                    await db.collection('customers').doc(userCredential.user.uid).set({
+                        email: email,
+                        name: name ? name.value : '',
+                        createdAt: new Date().toLocaleDateString()
+                    });
+                    navigateTo('home');
+                })
+                .catch((error) => {
+                    const err = document.getElementById('login-error');
+                    if(err) { err.style.display = 'block'; err.textContent = error.message; }
+                    if(btn) { btn.disabled = false; btn.textContent = 'Create Account'; }
+                });
         } else {
-            isAuthenticated = true;
-            userRole = 'customer';
-            
-            const loginBtn = document.querySelector('.navbar .nav-btn');
-            if (loginBtn) {
-                loginBtn.textContent = 'Logout';
-                loginBtn.setAttribute('onclick', 'handleLogout(event)');
-            }
-            navigateTo('home');
+            // Login existing customer
+            firebase.auth().signInWithEmailAndPassword(email, password)
+                .then(() => {
+                    isAuthenticated = true;
+                    userRole = 'customer';
+                    navigateTo('home');
+                })
+                .catch((error) => {
+                    const err = document.getElementById('login-error');
+                    if(err) { err.style.display = 'block'; err.textContent = 'Invalid email or password!'; }
+                    if(btn) { btn.disabled = false; btn.textContent = 'Log In'; }
+                });
         }
     }
 }
@@ -234,12 +273,8 @@ function handleLogout(e) {
     if(e) e.preventDefault();
     isAuthenticated = false;
     userRole = 'none';
-    
-    const logoutBtn = document.querySelector('.navbar .nav-btn');
-    if (logoutBtn) {
-        logoutBtn.textContent = 'Login';
-        logoutBtn.setAttribute('onclick', "navigateTo('login')");
-    }
+    // Sign out from Firebase if customer
+    firebase.auth().signOut().catch(() => {});
     navigateTo('login');
 }
 
