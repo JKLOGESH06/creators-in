@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CREATORS.IN - Academic Projects Done Right</title>
+    <meta name="description" content="Get your EEE, ECE, CSE, and Mechanical academic projects done fast, affordable, and reliable.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo" onclick="navigateTo('home')">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span>CREATORS.IN</span>
+            </div>
+            <div class="mobile-menu-btn" id="mobile-menu-btn">
+                <i class="fa-solid fa-bars"></i>
+            </div>
+            <ul class="nav-links" id="nav-links">
+                <li><a href="#home" onclick="navigateTo('home')">Home</a></li>
+                <li><a href="#projects" onclick="navigateTo('projects')">Browse Projects</a></li>
+                <li><a href="#custom" onclick="navigateTo('custom')">Custom Request</a></li>
+                <li><a href="#contact" onclick="navigateTo('contact')">Contact</a></li>
+                <li><a href="#login" class="nav-btn" onclick="navigateTo('login')">Login</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Admin Navigation -->
+    <nav class="admin-navbar" style="display: none;">
+        <div class="nav-container">
+            <div class="logo" onclick="navigateTo('admin-dashboard')">
+                <i class="fa-solid fa-user-tie"></i>
+                <span>CREATORS.IN Admin</span>
+            </div>
+            <ul class="nav-links show" style="display:flex;">
+                <li><a href="#admin-dashboard" onclick="navigateTo('admin-dashboard')">Dashboard</a></li>
+                <li><a href="#admin-requests" onclick="navigateTo('admin-requests')">Requests</a></li>
+                <li><a href="#admin-projects" onclick="navigateTo('admin-projects')">Projects</a></li>
+                <li><a href="#admin-settings" onclick="navigateTo('admin-settings')">Settings</a></li>
+                <li><a href="#" class="nav-btn" onclick="handleLogout(event)">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content Area (SPA container) -->
+    <main id="app-content">
+        <!-- Views will be injected here by script.js -->
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section brand">
+                <div class="logo">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                    <span>CREATORS.IN</span>
+                </div>
+                <p>Fast, affordable, and reliable academic projects for engineering students.</p>
+                <div class="trust-badges-footer">
+                    <span><i class="fa-solid fa-check-circle"></i> 100+ Delivered</span>
+                    <span><i class="fa-solid fa-headset"></i> Support till Viva</span>
+                </div>
+            </div>
+            <div class="footer-section links">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#home" onclick="navigateTo('home')">Home</a></li>
+                    <li><a href="#projects" onclick="navigateTo('projects')">Projects</a></li>
+                    <li><a href="#custom" onclick="navigateTo('custom')">Custom Request</a></li>
+                    <li><a href="#contact" onclick="navigateTo('contact')">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section contact-info">
+                <h3>Contact Us</h3>
+                <p><i class="fa-solid fa-envelope"></i> <span id="footer-email">support@creators.in</span></p>
+                <p><i class="fa-brands fa-whatsapp"></i> <span id="footer-phone">+91 98765 43210</span></p>
+                <div class="socials">
+                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+                    <a href="#"><i class="fa-brands fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 CREATORS.IN. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Floating WhatsApp Button -->
+    <a href="#" class="floating-whatsapp" id="floating-wa" target="_blank" aria-label="Chat on WhatsApp">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <!-- Scripts -->
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+    
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
