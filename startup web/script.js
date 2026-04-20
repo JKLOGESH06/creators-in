@@ -95,23 +95,27 @@ async function navigateTo(route, param = null) {
     }
 }
 
-// Initial Load
+// Initial Load — let Firebase decide routing
 document.addEventListener('DOMContentLoaded', async () => {
+    // Show loading spinner while Firebase checks auth state
+    appContent.innerHTML = '<div style="text-align:center; padding: 5rem;"><i class="fa-solid fa-spinner fa-spin fa-3x" style="color:var(--primary-color)"></i><p style="margin-top:1rem;">Loading...</p></div>';
+
     await injectContactInfo();
 
-    // Listen to Firebase Auth state
+    // Firebase Auth state listener — only fires once on load
     firebase.auth().onAuthStateChanged(async (user) => {
-        if (user && userRole === 'none') {
-            // Customer was previously logged in
+        if (user) {
+            // A customer is already logged in from a previous session
             isAuthenticated = true;
             userRole = 'customer';
             await navigateTo('home');
-        } else if (!user && userRole === 'none') {
+        } else {
+            // No one is logged in — go to login page
+            isAuthenticated = false;
+            userRole = 'none';
             navigateTo('login');
         }
     });
-
-    navigateTo('login');
 });
 
 // Helper: Inject dynamic contact info
