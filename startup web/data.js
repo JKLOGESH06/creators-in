@@ -126,7 +126,7 @@ const setupPromise = setupInitialDataIfNeeded();
 async function getProjects() {
     await setupPromise;
     const snapshot = await db.collection('projects').get();
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
 }
 
 async function updateProjectPrice(id, newPrice) {
@@ -149,7 +149,7 @@ async function updateContactInfo(newInfo) {
 
 async function getRequests() {
     const snapshot = await db.collection('requests').get();
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
 }
 
 async function addRequest(request) {
