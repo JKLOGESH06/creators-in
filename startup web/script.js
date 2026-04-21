@@ -40,12 +40,8 @@ const routes = {
     'admin-settings': renderAdminSettings
 };
 
-async function navigateTo(route, param = null) {
-    // If user is already authenticated and tries to go to login, 
-    // we should still allow them to see the role selection or just stay home.
-    // But for now, let's just allow the route.
-
-    // Enforce authentication for protected routes
+async function navigateTo(route, param = null, pushState = true) {
+    // ... existing protection logic ...
     const protectedRoutes = ['admin-dashboard', 'admin-requests', 'admin-projects', 'admin-settings'];
     if (protectedRoutes.includes(route) && (!isAuthenticated || userRole !== 'admin')) {
         route = 'login';
@@ -53,17 +49,23 @@ async function navigateTo(route, param = null) {
         route = 'login';
     }
 
+    if (pushState) {
+        history.pushState({ route, param }, '', `#${route}${param ? '-' + param : ''}`);
+    }
+
     // Toggle layout visibility based on route and role
     const navbar = document.querySelector('.navbar');
     const adminNavbar = document.querySelector('.admin-navbar');
     const footer = document.querySelector('.footer');
     const floatingWhatsApp = document.querySelector('.floating-whatsapp');
+    const backBtn = document.getElementById('back-button-container');
     
     if (route === 'login' || route === 'admin-login') {
         if(navbar) navbar.style.display = 'none';
         if(adminNavbar) adminNavbar.style.display = 'none';
         if(footer) footer.style.display = 'none';
         if(floatingWhatsApp) floatingWhatsApp.style.display = 'none';
+        if(backBtn) backBtn.style.display = 'none';
         document.body.classList.remove('customer-bg');
         document.body.classList.remove('admin-bg');
     } else {
@@ -72,6 +74,7 @@ async function navigateTo(route, param = null) {
             if(adminNavbar) adminNavbar.style.display = 'block';
             if(footer) footer.style.display = 'none';
             if(floatingWhatsApp) floatingWhatsApp.style.display = 'none';
+            if(backBtn) backBtn.style.display = 'none';
             document.body.classList.remove('customer-bg');
             document.body.classList.add('admin-bg');
         } else {
@@ -79,6 +82,8 @@ async function navigateTo(route, param = null) {
             if(adminNavbar) adminNavbar.style.display = 'none';
             if(footer) footer.style.display = 'block';
             if(floatingWhatsApp) floatingWhatsApp.style.display = 'flex';
+            // Show back button only if not on home
+            if(backBtn) backBtn.style.display = route === 'home' ? 'none' : 'block';
             document.body.classList.add('customer-bg');
             document.body.classList.remove('admin-bg');
         }
@@ -116,6 +121,18 @@ async function navigateTo(route, param = null) {
         await routes[route](param);
     }
 }
+
+window.onpopstate = function(event) {
+    if (event.state) {
+        navigateTo(event.state.route, event.state.param, false);
+    } else {
+        navigateTo('home', null, false);
+    }
+};
+
+window.goBack = function() {
+    window.history.back();
+};
 
 // Initial Load — let Firebase decide routing
 document.addEventListener('DOMContentLoaded', async () => {
@@ -676,6 +693,8 @@ window.approveRequestToProject = async function(id) {
 
     const newProject = {
         title: "Custom: " + req.desc.substring(0, 30) + (req.desc.length > 30 ? "..." : ""),
+        customerName: req.name || 'N/A',
+        customerPhone: req.phone || 'N/A',
         category: req.branch,
         shortDesc: req.desc.substring(0, 50) + "...",
         fullDesc: req.desc,
@@ -705,6 +724,8 @@ async function renderAdminProjects() {
                     <tr>
                         <th>ID</th>
                         <th>Project Title</th>
+                        <th>Customer</th>
+                        <th>Phone</th>
                         <th>Category</th>
                         <th>Current Price</th>
                         <th>Action</th>
@@ -713,19 +734,23 @@ async function renderAdminProjects() {
                 <tbody>
                     ${ongoingProjects.map(p => `
                         <tr>
-                            <td>#${p.id}</td>
+                            <td><small>#${p.id.substring(0,6)}</small></td>
                             <td><strong>${p.title}</strong></td>
+                            <td>${p.customerName || 'N/A'}</td>
+                            <td>${p.customerPhone || 'N/A'}</td>
                             <td>${p.category}</td>
                             <td>
-                                <input type="text" id="price-${p.id}" value="${p.price}" class="form-control" style="width: 120px; padding: 0.4rem;">
+                                <input type="text" id="price-${p.id}" value="${p.price}" class="form-control" style="width: 100px; padding: 0.4rem;">
                             </td>
                             <td>
-                                <button class="admin-action-btn" onclick="saveProjectPrice('${p.id}')">Save Price</button>
-                                <button class="admin-action-btn" style="background-color: #198754; margin-left: 0.5rem;" onclick="markProjectCompleted('${p.id}')">Complete</button>
+                                <div style="display:flex; gap: 0.5rem;">
+                                    <button class="admin-action-btn" onclick="saveProjectPrice('${p.id}')">Save</button>
+                                    <button class="admin-action-btn" style="background-color: #198754;" onclick="markProjectCompleted('${p.id}')">Complete</button>
+                                </div>
                             </td>
                         </tr>
                     `).join('')}
-                    ${ongoingProjects.length === 0 ? '<tr><td colspan="5" class="text-center">No ongoing projects.</td></tr>' : ''}
+                    ${ongoingProjects.length === 0 ? '<tr><td colspan="7" class="text-center">No ongoing projects.</td></tr>' : ''}
                 </tbody>
             </table>
         </div>
@@ -737,6 +762,8 @@ async function renderAdminProjects() {
                     <tr>
                         <th>ID</th>
                         <th>Project Title</th>
+                        <th>Customer</th>
+                        <th>Phone</th>
                         <th>Category</th>
                         <th>Final Price</th>
                         <th>Status</th>
@@ -746,8 +773,10 @@ async function renderAdminProjects() {
                 <tbody>
                     ${completedProjects.map(p => `
                         <tr>
-                            <td>#${p.id}</td>
+                            <td><small>#${p.id.substring(0,6)}</small></td>
                             <td><strong>${p.title}</strong></td>
+                            <td>${p.customerName || 'N/A'}</td>
+                            <td>${p.customerPhone || 'N/A'}</td>
                             <td>${p.category}</td>
                             <td>${p.price}</td>
                             <td><span style="color: #198754; font-weight: bold;"><i class="fa-solid fa-check-circle"></i> Completed</span></td>
@@ -756,7 +785,7 @@ async function renderAdminProjects() {
                             </td>
                         </tr>
                     `).join('')}
-                    ${completedProjects.length === 0 ? '<tr><td colspan="6" class="text-center">No completed projects yet.</td></tr>' : ''}
+                    ${completedProjects.length === 0 ? '<tr><td colspan="8" class="text-center">No completed projects yet.</td></tr>' : ''}
                 </tbody>
             </table>
         </div>

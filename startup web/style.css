@@ -280,6 +280,30 @@ main#app-content {
     color: white;
 }
 
+/* Back Button */
+.btn-back {
+    background: white;
+    color: var(--primary-color);
+    border: 1px solid #dee2e6;
+    padding: 0.6rem 1.2rem;
+    border-radius: 50px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: var(--shadow-sm);
+    margin-top: 1rem;
+}
+
+.btn-back:hover {
+    background: #f8f9fa;
+    transform: translateX(-5px);
+    box-shadow: var(--shadow-md);
+    color: var(--primary-hover);
+}
+
 /* Hero Section */
 .hero {
     display: flex;
