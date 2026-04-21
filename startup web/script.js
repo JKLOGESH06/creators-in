@@ -310,12 +310,8 @@ function handleLogout(e) {
 // ==============================
 
 async function renderHome() {
-    const user = firebase.auth().currentUser;
-    const allProjects = await getProjects();
-    
-    // For customers, show only their projects
-    // For guests, show nothing or generic message (since we removed initial projects)
-    const myProjects = user ? allProjects.filter(p => p.customerId === user.uid) : [];
+    const currentProjects = await getProjects();
+    const featuredProjects = currentProjects.slice(0, 3);
     
     let html = `
         <section class="hero">
@@ -332,23 +328,6 @@ async function renderHome() {
             </div>
         </section>
 
-        ${isAuthenticated && userRole === 'customer' ? `
-        <section class="my-projects mb-4">
-            <h2 class="section-title">My Ongoing Projects</h2>
-            ${myProjects.length > 0 ? `
-                <div class="projects-grid">
-                    ${myProjects.map(createProjectCardHTML).join('')}
-                </div>
-            ` : `
-                <div class="text-center" style="padding: 3rem; background: rgba(255,255,255,0.8); border-radius: 15px; border: 2px dashed var(--primary-color);">
-                    <i class="fa-solid fa-folder-open fa-3x mb-3" style="color: var(--primary-color)"></i>
-                    <h3>No ongoing projects yet</h3>
-                    <p>Submit a custom request to get started on your project!</p>
-                    <button class="btn btn-primary mt-3" onclick="navigateTo('custom')">Submit Request</button>
-                </div>
-            `}
-        </section>
-        ` : `
         <section class="how-it-works">
             <h2 class="section-title">How It Works</h2>
             <div class="steps">
@@ -374,7 +353,16 @@ async function renderHome() {
                 </div>
             </div>
         </section>
-        `}
+
+        <section class="featured-projects mb-4">
+            <h2 class="section-title">Featured Projects</h2>
+            <div class="projects-grid">
+                ${featuredProjects.map(createProjectCardHTML).join('')}
+            </div>
+            <div class="text-center mt-4">
+                <button class="btn btn-primary" onclick="navigateTo('projects')">View All Projects</button>
+            </div>
+        </section>
     `;
     appContent.innerHTML = html;
 }
@@ -531,11 +519,7 @@ function renderCustomRequest() {
 
 async function submitCustomRequest(e) {
     e.preventDefault();
-    const user = firebase.auth().currentUser;
-    if(!user) return navigateTo('login');
-
     const newReq = {
-        customerId: user.uid,
         name: document.getElementById('req-name').value,
         email: document.getElementById('req-email').value,
         phone: document.getElementById('req-phone').value,
@@ -546,7 +530,6 @@ async function submitCustomRequest(e) {
     
     await addRequest(newReq);
     
-    alert('Request submitted successfully! We will contact you soon.');
     navigateTo('home');
 }
 
@@ -691,7 +674,6 @@ window.approveRequestToProject = async function(id) {
     if (!req) return;
 
     const newProject = {
-        customerId: req.customerId || 'manual',
         title: "Custom: " + req.desc.substring(0, 30) + (req.desc.length > 30 ? "..." : ""),
         category: req.branch,
         shortDesc: req.desc.substring(0, 50) + "...",
@@ -699,7 +681,6 @@ window.approveRequestToProject = async function(id) {
         components: "Custom Request Components",
         output: "Custom Delivery",
         price: "₹" + (req.budget || "TBD"),
-        status: 'ongoing',
         image: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80"
     };
 
