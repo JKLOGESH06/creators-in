@@ -41,7 +41,7 @@ const routes = {
 };
 
 async function navigateTo(route, param = null, pushState = true) {
-    // ... existing protection logic ...
+    // Enforce authentication for protected routes
     const protectedRoutes = ['admin-dashboard', 'admin-requests', 'admin-projects', 'admin-settings'];
     if (protectedRoutes.includes(route) && (!isAuthenticated || userRole !== 'admin')) {
         route = 'login';
@@ -143,16 +143,29 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Firebase Auth state listener — only fires once on load
     firebase.auth().onAuthStateChanged(async (user) => {
+        // Determine initial route from URL hash
+        const hash = window.location.hash.substring(1);
+        const initialRoute = hash.split('-')[0] || 'home';
+        const initialParam = hash.split('-')[1] || null;
+
         if (user) {
-            // A customer is already logged in from a previous session
             isAuthenticated = true;
-            userRole = 'customer';
-            await navigateTo('home');
+            // Check if user is admin
+            if (user.email === 'admin@creators.in') {
+                userRole = 'admin';
+            } else {
+                userRole = 'customer';
+            }
+            await navigateTo(initialRoute, initialParam);
         } else {
-            // No one is logged in — go to login page
             isAuthenticated = false;
-            userRole = 'none';
-            navigateTo('login');
+            userRole = null;
+            // Allow public routes, otherwise go to login
+            if (['login', 'admin-login', 'home'].includes(initialRoute)) {
+                await navigateTo(initialRoute, initialParam);
+            } else {
+                navigateTo('login');
+            }
         }
     });
 });
