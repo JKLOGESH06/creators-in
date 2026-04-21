@@ -41,8 +41,15 @@ const routes = {
 };
 
 async function navigateTo(route, param = null) {
-    // Enforce authentication
-    if (!isAuthenticated && route !== 'login' && route !== 'admin-login') {
+    // If user is already authenticated and tries to go to login, 
+    // we should still allow them to see the role selection or just stay home.
+    // But for now, let's just allow the route.
+
+    // Enforce authentication for protected routes
+    const protectedRoutes = ['admin-dashboard', 'admin-requests', 'admin-projects', 'admin-settings'];
+    if (protectedRoutes.includes(route) && (!isAuthenticated || userRole !== 'admin')) {
+        route = 'login';
+    } else if (!isAuthenticated && route !== 'login' && route !== 'admin-login') {
         route = 'login';
     }
 
@@ -74,6 +81,19 @@ async function navigateTo(route, param = null) {
             if(floatingWhatsApp) floatingWhatsApp.style.display = 'flex';
             document.body.classList.add('customer-bg');
             document.body.classList.remove('admin-bg');
+        }
+    }
+
+    // Update Navbar buttons based on auth state
+    const loginBtn = document.getElementById('login-nav-btn');
+    const logoutBtn = document.getElementById('logout-nav-btn');
+    if (loginBtn && logoutBtn) {
+        if (isAuthenticated) {
+            loginBtn.style.display = 'none';
+            logoutBtn.style.display = 'block';
+        } else {
+            loginBtn.style.display = 'block';
+            logoutBtn.style.display = 'none';
         }
     }
 
@@ -142,7 +162,8 @@ async function injectContactInfo() {
 // ==============================
 
 function renderLogin(step = 'role', role = 'customer', isSignup = false) {
-    if (!step) step = 'role';
+    // Force 'role' step if explicitly requested or if no valid step is provided
+    if (step !== 'form') step = 'role';
     let html = '';
 
     if (step === 'role') {
@@ -156,7 +177,7 @@ function renderLogin(step = 'role', role = 'customer', isSignup = false) {
                     <button class="btn btn-primary" style="padding: 1rem;" onclick="renderLogin('form', 'customer', false)">
                         <i class="fa-solid fa-user-graduate"></i> Customer Portal
                     </button>
-                    <button class="btn btn-outline" style="padding: 1rem;" onclick="renderLogin('form', 'admin', false)">
+                    <button class="btn btn-primary" style="padding: 1rem; background-color: #6c757d;" onclick="renderLogin('form', 'admin', false)">
                         <i class="fa-solid fa-user-tie"></i> Admin Portal
                     </button>
                 </div>
