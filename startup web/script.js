@@ -31,8 +31,8 @@ const routes = {
     custom: renderCustomRequest,
     contact: renderContact,
     detail: renderProjectDetail,
-    login: renderLoginCustomer,
-    'admin-login': renderLoginAdmin,
+    login: renderLogin,
+    'admin-login': () => renderLogin('form', 'admin'),
     // Admin Routes
     'admin-dashboard': renderAdminDashboard,
     'admin-requests': renderAdminRequests,
