@@ -41,9 +41,16 @@ const routes = {
 };
 
 async function navigateTo(route, param = null) {
-    // Enforce authentication
-    if (!isAuthenticated && route !== 'login' && route !== 'admin-login') {
-        route = 'login';
+    // Enforce authentication for admin routes only
+    const adminRoutes = ['admin-dashboard', 'admin-requests', 'admin-projects', 'admin-settings'];
+    
+    if (adminRoutes.includes(route) && (!isAuthenticated || userRole !== 'admin')) {
+        route = 'admin-login';
+    }
+    
+    // Default to home if route is unknown
+    if (!routes[route]) {
+        route = 'home';
     }
 
     // Toggle layout visibility based on route and role
@@ -112,10 +119,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             userRole = 'customer';
             await navigateTo('home');
         } else {
-            // No one is logged in — go to login page
+            // No one is logged in — stay on home (don't force login)
             isAuthenticated = false;
             userRole = 'none';
-            navigateTo('login');
+            navigateTo('home');
         }
     });
 });
