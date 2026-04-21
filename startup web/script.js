@@ -145,7 +145,8 @@ async function injectContactInfo() {
     const contact = await getContactInfo();
     if(!contact) return;
     
-    const waLink = `https://wa.me/${contact.whatsapp}?text=Hi%20CREATORS.IN`;
+    const waMessage = encodeURIComponent("HI WE ARE CREATORS.IN HOW WE CAN GIVE OUR SUPPORT FOR YOU");
+    const waLink = `https://wa.me/${contact.whatsapp}?text=${waMessage}`;
     
     const waFloating = document.getElementById('floating-wa');
     if(waFloating) waFloating.href = waLink;
@@ -539,7 +540,7 @@ async function renderContact() {
         <h2 class="section-title">Get In Touch</h2>
         <div class="contact-grid">
             <div class="contact-cards">
-                <a href="https://wa.me/${contact.whatsapp}" target="_blank" class="contact-card">
+                <a href="https://wa.me/${contact.whatsapp}?text=${encodeURIComponent("HI WE ARE CREATORS.IN HOW WE CAN GIVE OUR SUPPORT FOR YOU")}" target="_blank" class="contact-card">
                     <div class="contact-icon whatsapp"><i class="fa-brands fa-whatsapp"></i></div>
                     <div>
                         <h3>Chat on WhatsApp</h3>
