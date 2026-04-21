@@ -41,16 +41,9 @@ const routes = {
 };
 
 async function navigateTo(route, param = null) {
-    // Enforce authentication for admin routes only
-    const adminRoutes = ['admin-dashboard', 'admin-requests', 'admin-projects', 'admin-settings'];
-    
-    if (adminRoutes.includes(route) && (!isAuthenticated || userRole !== 'admin')) {
-        route = 'admin-login';
-    }
-    
-    // Default to home if route is unknown
-    if (!routes[route]) {
-        route = 'home';
+    // Enforce authentication
+    if (!isAuthenticated && route !== 'login' && route !== 'admin-login') {
+        route = 'login';
     }
 
     // Toggle layout visibility based on route and role
@@ -119,10 +112,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             userRole = 'customer';
             await navigateTo('home');
         } else {
-            // No one is logged in — stay on home (don't force login)
+            // No one is logged in — go to login page
             isAuthenticated = false;
             userRole = 'none';
-            navigateTo('home');
+            navigateTo('login');
         }
     });
 });
@@ -148,104 +141,80 @@ async function injectContactInfo() {
 // AUTHENTICATION VIEWS
 // ==============================
 
-// Customer Portal Login (direct entry)
-function renderLoginCustomer(isSignup = false) {
-    let html = `
-        <div class="auth-container form-container">
-            <div class="auth-header">
-                <h2><i class="fa-solid fa-user-graduate" style="color: var(--primary-color);"></i> Customer Portal</h2>
-                <p>Log in to manage your project requests.</p>
-            </div>
+function renderLogin(step = 'role', role = 'customer', isSignup = false) {
+    if (!step) step = 'role';
+    let html = '';
 
-            <div class="auth-tabs">
-                <div class="auth-tab ${!isSignup ? 'active' : ''}" onclick="renderLoginCustomer(false)">Login</div>
-                <div class="auth-tab ${isSignup ? 'active' : ''}" onclick="renderLoginCustomer(true)">Sign Up</div>
-            </div>
-
-            <form onsubmit="submitAuth(event, 'customer', ${isSignup})">
-                ${isSignup ? `
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" class="form-control" required placeholder="YOUR NAME">
+    if (step === 'role') {
+        html = `
+            <div class="auth-container form-container" style="text-align: center;">
+                <div class="auth-header">
+                    <h2>Welcome to CREATORS.IN</h2>
+                    <p>Please select your login type</p>
                 </div>
-                <div class="form-group">
-                    <label>Phone / WhatsApp</label>
-                    <input type="tel" class="form-control" required placeholder="+91 XXXXX XXXXX">
+                <div style="display: flex; gap: 1rem; flex-direction: column;">
+                    <button class="btn btn-primary" style="padding: 1rem;" onclick="renderLogin('form', 'customer', false)">
+                        <i class="fa-solid fa-user-graduate"></i> Customer Portal
+                    </button>
+                    <button class="btn btn-outline" style="padding: 1rem;" onclick="renderLogin('form', 'admin', false)">
+                        <i class="fa-solid fa-user-tie"></i> Admin Portal
+                    </button>
+                </div>
+            </div>
+        `;
+    } else if (step === 'form') {
+        html = `
+            <div class="auth-container form-container">
+                <button class="btn btn-outline" style="padding: 0.3rem 0.8rem; margin-bottom: 1rem; font-size: 0.8rem;" onclick="renderLogin('role')"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                
+                <div class="auth-header">
+                    <h2>${role === 'admin' ? 'Admin Access' : 'Customer Portal'}</h2>
+                    <p>${role === 'admin' ? 'Log in to manage the platform.' : 'Log in to manage your project requests.'}</p>
+                </div>
+                
+                ${role === 'customer' ? `
+                <div class="auth-tabs">
+                    <div class="auth-tab ${!isSignup ? 'active' : ''}" onclick="renderLogin('form', 'customer', false)">Login</div>
+                    <div class="auth-tab ${isSignup ? 'active' : ''}" onclick="renderLogin('form', 'customer', true)">Sign Up</div>
                 </div>
                 ` : ''}
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" id="auth-email" class="form-control" required placeholder="ENTER MAIL">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="auth-password" class="form-control" required placeholder="ENTER PASSWORD">
-                </div>
 
-                ${!isSignup ? `
-                <div style="text-align: right; margin-bottom: 1.5rem;">
-                    <a href="#" style="font-size: 0.9rem;">Forgot Password?</a>
-                </div>
-                ` : '<div style="margin-bottom: 1.5rem;"></div>'}
+                <form onsubmit="submitAuth(event, '${role}', ${isSignup})">
+                    ${isSignup && role === 'customer' ? `
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" class="form-control" required placeholder="YOUR NAME">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone / WhatsApp</label>
+                        <input type="tel" class="form-control" required placeholder="+91 XXXXX XXXXX">
+                    </div>
+                    ` : ''}
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="auth-email" class="form-control" required placeholder="${role === 'admin' ? 'ADMIN' : 'ENTER MAIL'}">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="auth-password" class="form-control" required placeholder="ENTER PASSWORD">
+                    </div>
+                    
+                    ${!isSignup ? `
+                    <div style="text-align: right; margin-bottom: 1.5rem;">
+                        <a href="#" style="font-size: 0.9rem;">Forgot Password?</a>
+                    </div>
+                    ` : '<div style="margin-bottom: 1.5rem;"></div>'}
+                    
+                    <div id="login-error" style="color: #dc3545; margin-bottom: 1rem; display: none; font-size: 0.9rem; text-align: center; font-weight: 500;">Invalid email or password! Please try again.</div>
 
-                <div id="login-error" style="color: #dc3545; margin-bottom: 1rem; display: none; font-size: 0.9rem; text-align: center; font-weight: 500;">Invalid email or password! Please try again.</div>
-
-                <button type="submit" id="auth-submit-btn" class="btn btn-primary" style="width: 100%;">
-                    ${isSignup ? 'Create Account' : 'Log In'}
-                </button>
-            </form>
-
-            <div style="text-align: center; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e9ecef;">
-                <a href="#admin-login" onclick="navigateTo('admin-login')" style="font-size: 0.85rem; color: var(--text-muted);">
-                    <i class="fa-solid fa-user-tie"></i> Admin Portal
-                </a>
+                    <button type="submit" id="auth-submit-btn" class="btn btn-primary" style="width: 100%;">
+                        ${isSignup ? 'Create Account' : 'Log In'}
+                    </button>
+                </form>
             </div>
-        </div>
-    `;
-    appContent.innerHTML = html;
-}
-
-// Admin Portal Login (direct entry)
-function renderLoginAdmin() {
-    let html = `
-        <div class="auth-container form-container">
-            <button class="btn btn-outline" style="padding: 0.3rem 0.8rem; margin-bottom: 1rem; font-size: 0.8rem;" onclick="navigateTo('login')">
-                <i class="fa-solid fa-arrow-left"></i> Back to Customer Portal
-            </button>
-
-            <div class="auth-header">
-                <h2><i class="fa-solid fa-user-tie" style="color: var(--primary-color);"></i> Admin Portal</h2>
-                <p>Log in to manage the platform.</p>
-            </div>
-
-            <form onsubmit="submitAuth(event, 'admin', false)">
-                <div class="form-group">
-                    <label>Email Address</label>
-                    <input type="email" id="auth-email" class="form-control" required placeholder="ADMIN EMAIL">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="auth-password" class="form-control" required placeholder="ENTER PASSWORD">
-                </div>
-
-                <div id="login-error" style="color: #dc3545; margin-bottom: 1rem; display: none; font-size: 0.9rem; text-align: center; font-weight: 500;">Invalid credentials! Please try again.</div>
-
-                <button type="submit" id="auth-submit-btn" class="btn btn-primary" style="width: 100%;">
-                    <i class="fa-solid fa-lock"></i> Log In as Admin
-                </button>
-            </form>
-        </div>
-    `;
-    appContent.innerHTML = html;
-}
-
-// Legacy alias kept for any internal references
-function renderLogin(step = 'role', role = 'customer', isSignup = false) {
-    if (role === 'admin' || step === 'admin') {
-        renderLoginAdmin();
-    } else {
-        renderLoginCustomer(isSignup);
+        `;
     }
+    appContent.innerHTML = html;
 }
 
 function submitAuth(e, role, isSignup) {
