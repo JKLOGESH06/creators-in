@@ -19,9 +19,9 @@
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
-            <div class="logo" onclick="navigateTo('home')">
-                <i class="fa-solid fa-graduation-cap"></i>
-                <span>CREATORS.IN</span>
+            <div class="logo" onclick="navigateTo('home')" style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                <img src="logo.jpg" alt="Logo" style="height: 45px; border-radius: 6px;">
+                <span style="font-weight: 800; font-size: 1.3rem; letter-spacing: 0.5px; color: var(--primary-color);">CREATORS.IN</span>
             </div>
             <div class="mobile-menu-btn" id="mobile-menu-btn">
                 <i class="fa-solid fa-bars"></i>
@@ -37,22 +37,7 @@
         </div>
     </nav>
 
-    <!-- Admin Navigation -->
-    <nav class="admin-navbar" style="display: none;">
-        <div class="nav-container">
-            <div class="logo" onclick="navigateTo('admin-dashboard')">
-                <i class="fa-solid fa-user-tie"></i>
-                <span>CREATORS.IN Admin</span>
-            </div>
-            <ul class="nav-links show" style="display:flex;">
-                <li><a href="javascript:void(0)" onclick="navigateTo('admin-dashboard')">Dashboard</a></li>
-                <li><a href="javascript:void(0)" onclick="navigateTo('admin-requests')">Requests</a></li>
-                <li><a href="javascript:void(0)" onclick="navigateTo('admin-projects')">Projects</a></li>
-                <li><a href="javascript:void(0)" onclick="navigateTo('admin-settings')">Settings</a></li>
-                <li><a href="#" class="nav-btn" onclick="handleLogout(event)">Logout</a></li>
-            </ul>
-        </div>
-    </nav>
+
 
     <!-- Back Button for Customers -->
     <div id="back-button-container" style="display: none; max-width: 1200px; margin: 1rem auto; padding: 0 2rem;">
@@ -70,9 +55,9 @@
     <footer class="footer">
         <div class="footer-content">
             <div class="footer-section brand">
-                <div class="logo">
-                    <i class="fa-solid fa-graduation-cap"></i>
-                    <span>CREATORS.IN</span>
+                <div class="logo" style="display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem;">
+                    <img src="logo.jpg" alt="Logo" style="height: 45px; border-radius: 6px;">
+                    <span style="font-weight: 800; font-size: 1.3rem; color: #fff;">CREATORS.IN</span>
                 </div>
                 <p>Fast, affordable, and reliable academic projects for engineering students.</p>
                 <div class="trust-badges-footer">
