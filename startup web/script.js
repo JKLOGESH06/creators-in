@@ -189,7 +189,7 @@ function renderLogin(isSignup = false) {
     let html = '';
 
     const howItWorksHTML = `
-        <section class="how-it-works" style="margin-top: 4rem;">
+        <section class="how-it-works on-dark" style="margin-top: 4rem;">
             <h2 class="section-title">Service Provider</h2>
             <div class="steps">
                 <div class="step-card">
@@ -223,9 +223,10 @@ function renderLogin(isSignup = false) {
                 <img src="logo.jpg" alt="Logo" style="max-width: 250px; display: block;">
             </div>
         </div>
-        <div class="auth-container form-container" style="position: relative; z-index: 40; background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+        <div class="auth-container glass-panel">
             <div class="auth-header">
-                <p>Log in to manage your project requests.</p>
+                <h2 style="color: white; margin-bottom: 0.5rem;">Welcome Back</h2>
+                <p style="color: rgba(255,255,255,0.7);">Log in to manage your project requests.</p>
             </div>
             
             <div class="auth-tabs">
@@ -334,16 +335,30 @@ async function renderHome() {
 
     let html = `
         <section class="hero">
-            <h1>Get Your Academic Projects Done</h1>
+            <div class="marquee-container">
+                <div class="marquee-content">
+                    <h1>Get Your Academic Projects Done &nbsp;&bull;&nbsp;</h1>
+                    <h1>Get Your Academic Projects Done &nbsp;&bull;&nbsp;</h1>
+                </div>
+            </div>
             <p>Fast, Affordable, Reliable. Specially designed for EEE, ECE, CSE, and Mechanical Engineering students.</p>
             <div class="hero-ctas">
                 <button class="btn btn-primary" onclick="navigateTo('projects')">Browse Projects</button>
                 <button class="btn btn-outline" onclick="navigateTo('custom')">Request Custom Project</button>
             </div>
-            <div class="trust-badges">
-                <div class="trust-badge"><i class="fa-solid fa-check-circle"></i> 100+ Projects Delivered</div>
-                <div class="trust-badge"><i class="fa-solid fa-shield-halved"></i> Support till Viva</div>
-                <div class="trust-badge"><i class="fa-solid fa-gears"></i> Fully Customizable</div>
+            <div class="marquee-container" style="margin-top: 3rem;">
+                <div class="marquee-content" style="animation-duration: 40s;">
+                    <div class="trust-badges">
+                        <div class="trust-badge"><i class="fa-solid fa-check-circle"></i> 100+ Projects Delivered</div>
+                        <div class="trust-badge"><i class="fa-solid fa-shield-halved"></i> Support till Viva</div>
+                        <div class="trust-badge"><i class="fa-solid fa-gears"></i> Fully Customizable</div>
+                    </div>
+                    <div class="trust-badges">
+                        <div class="trust-badge"><i class="fa-solid fa-check-circle"></i> 100+ Projects Delivered</div>
+                        <div class="trust-badge"><i class="fa-solid fa-shield-halved"></i> Support till Viva</div>
+                        <div class="trust-badge"><i class="fa-solid fa-gears"></i> Fully Customizable</div>
+                    </div>
+                </div>
             </div>
         </section>
 
