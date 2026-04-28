@@ -219,7 +219,9 @@ function renderLogin(isSignup = false) {
     html = `
         ${createGradientBGHTML()}
         <div class="gradient-header" style="margin-top: 3rem; margin-bottom: 2rem;">
-            <img src="logo.jpg" alt="Logo" style="max-width: 250px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+            <div class="logo-shine-wrapper">
+                <img src="logo.jpg" alt="Logo" style="max-width: 250px; display: block;">
+            </div>
         </div>
         <div class="auth-container form-container" style="position: relative; z-index: 40; background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
             <div class="auth-header">

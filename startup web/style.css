@@ -489,6 +489,45 @@ main#app-content {
     filter: drop-shadow(0 10px 20px rgba(0,0,0,0.5));
 }
 
+/* Glowing & Shining Logo Effect */
+.logo-shine-wrapper {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.logo-shine-wrapper::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 20%;
+    height: 200%;
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: rotate(30deg);
+    animation: shine 4s infinite ease-in-out;
+}
+
+@keyframes shine {
+    0% { left: -60%; }
+    20% { left: 120%; }
+    100% { left: 120%; }
+}
+
+@keyframes pulse-glow {
+    0% { box-shadow: 0 0 15px rgba(18, 113, 255, 0.3); }
+    50% { box-shadow: 0 0 40px rgba(18, 113, 255, 0.6), 0 0 20px rgba(221, 74, 255, 0.4); }
+    100% { box-shadow: 0 0 15px rgba(18, 113, 255, 0.3); }
+}
+
 
 /* How It Works */
 .how-it-works {
