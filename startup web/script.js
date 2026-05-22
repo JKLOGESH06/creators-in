@@ -71,13 +71,20 @@ async function navigateTo(route, param = null, pushState = true) {
     // Update Navbar buttons based on auth state
     const loginBtn = document.getElementById('login-nav-btn');
     const logoutBtn = document.getElementById('logout-nav-btn');
+    const adminDashLink = document.getElementById('admin-dash-link');
+
     if (loginBtn && logoutBtn) {
         if (isAuthenticated) {
             loginBtn.style.display = 'none';
             logoutBtn.style.display = 'block';
+            // Show admin dash link only if user is admin
+            if (adminDashLink) {
+                adminDashLink.style.display = userRole === 'admin' ? 'block' : 'none';
+            }
         } else {
             loginBtn.style.display = 'block';
             logoutBtn.style.display = 'none';
+            if (adminDashLink) adminDashLink.style.display = 'none';
         }
     }
 
