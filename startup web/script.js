@@ -35,6 +35,11 @@ const routes = {
 };
 
 async function navigateTo(route, param = null, pushState = true) {
+    // Close mobile menus on navigation
+    if (navLinks) navLinks.classList.remove('show');
+    const adminNav = document.querySelector('.admin-navbar .nav-links');
+    if (adminNav) adminNav.classList.remove('show');
+
     const protectedRoutes = []; // Admin routes removed
     if (!isAuthenticated && route !== 'login' && route !== 'home') {
         route = 'login';
@@ -59,7 +64,7 @@ async function navigateTo(route, param = null, pushState = true) {
         if (backBtn) backBtn.style.display = 'none';
         document.body.classList.remove('customer-bg');
     } else {
-        if (navLinks) navLinks.style.display = 'flex'; // Restore links on other pages
+        if (navLinks) navLinks.style.display = ''; // Restore links on other pages
         if (navbar) navbar.style.display = 'block';
         if (footer) footer.style.display = 'block';
         if (floatingWhatsApp) floatingWhatsApp.style.display = 'flex';
