@@ -571,16 +571,28 @@ function renderCustomRequest() {
                     <label>Phone / WhatsApp Number</label>
                     <input type="tel" id="req-phone" class="form-control" required placeholder="+91 XXXXX XXXXX">
                 </div>
-                <div class="form-group">
-                    <label>Branch / Department</label>
-                    <select id="req-branch" class="form-control" required>
-                        <option value="">Select Branch</option>
-                        <option value="EEE">EEE</option>
-                        <option value="ECE">ECE</option>
-                        <option value="CSE">CSE</option>
-                        <option value="Mechanical">Mechanical</option>
-                        <option value="Other">Other</option>
-                    </select>
+                <div style="display: flex; gap: 1rem;">
+                    <div class="form-group" style="flex: 1; margin-bottom: 1.5rem;">
+                        <label>Branch / Department</label>
+                        <select id="req-branch" class="form-control" required>
+                            <option value="">Select Branch</option>
+                            <option value="EEE">EEE</option>
+                            <option value="ECE">ECE</option>
+                            <option value="CSE">CSE</option>
+                            <option value="Mechanical">Mechanical</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex: 1; margin-bottom: 1.5rem;">
+                        <label>Year</label>
+                        <select id="req-year" class="form-control" required>
+                            <option value="">Select Year</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Project Type</label>
@@ -596,10 +608,6 @@ function renderCustomRequest() {
                 <div class="form-group">
                     <label>Project Description & Requirements</label>
                     <textarea id="req-desc" class="form-control" required placeholder="Describe what you want to build..."></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Estimated Budget (₹)</label>
-                    <input type="number" id="req-budget" class="form-control" placeholder="e.g. 4000">
                 </div>
                 <button type="submit" id="custom-req-submit-btn" class="btn btn-primary" style="width: 100%; height: 48px;"><i class="fa-solid fa-paper-plane"></i> Submit Request</button>
             </form>
@@ -618,10 +626,10 @@ async function submitCustomRequest(e) {
             email: document.getElementById('req-email').value,
             phone: document.getElementById('req-phone').value,
             branch: document.getElementById('req-branch').value,
+            year: document.getElementById('req-year').value,
             type: document.getElementById('req-type').value,
             projectType: document.getElementById('req-type').value,
-            desc: document.getElementById('req-desc').value,
-            budget: document.getElementById('req-budget').value
+            desc: document.getElementById('req-desc').value
         };
 
         await addRequest(newReq);
