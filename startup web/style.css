@@ -1079,6 +1079,10 @@ textarea.form-control {
     background: #6c757d;
 }
 
+.contact-icon.instagram {
+    background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+}
+
 /* FAQ */
 .faq-item {
     background: white;

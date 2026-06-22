@@ -487,7 +487,6 @@ function setFilter(cat) {
 
 function createProjectCardHTML(project) {
     const isCompleted = project.status && project.status.toLowerCase() === 'completed';
-    const displayPrice = String(project.price).startsWith('₹') ? project.price : `₹${project.price}`;
     return `
         <div class="project-card">
             <img src="${project.image}" alt="${project.title}" class="project-img">
@@ -498,8 +497,7 @@ function createProjectCardHTML(project) {
                 </div>
                 <h3 class="project-title">${project.title}</h3>
                 <p class="project-desc">${project.shortDesc || ''}</p>
-                <div class="project-footer">
-                    <span class="project-price">${displayPrice}</span>
+                <div class="project-footer" style="justify-content: flex-end;">
                     <button class="btn btn-outline" onclick="navigateTo('detail', '${project.id}')">View Details</button>
                 </div>
             </div>
@@ -513,7 +511,6 @@ async function renderProjectDetail(id) {
     if (!project) return navigateTo('projects');
     const contact = await getContactInfo();
     const isCompleted = project.status && project.status.toLowerCase() === 'completed';
-    const displayPrice = String(project.price).startsWith('₹') ? project.price : `₹${project.price}`;
 
     let html = `
         <button class="btn btn-outline mb-4" onclick="navigateTo('projects')"><i class="fa-solid fa-arrow-left"></i> Back to Projects</button>
@@ -527,9 +524,8 @@ async function renderProjectDetail(id) {
                     <span class="project-status-badge" style="padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; background: ${isCompleted ? 'rgba(25, 135, 84, 0.1)' : 'rgba(13, 110, 253, 0.1)'}; color: ${isCompleted ? '#198754' : '#0d6efd'}; border: 1px solid ${isCompleted ? 'rgba(25, 135, 84, 0.2)' : 'rgba(13, 110, 253, 0.2)'};">${isCompleted ? 'Finished' : 'Ongoing'}</span>
                 </div>
                 <h1>${project.title}</h1>
-                <div class="detail-price">${displayPrice} <span style="font-size: 1rem; color: #6c757d; font-weight: 400;">(Estimated)</span></div>
                 
-                <div class="detail-section">
+                <div class="detail-section" style="margin-top: 1.5rem;">
                     <h3>Description</h3>
                     <p>${project.fullDesc}</p>
                 </div>
@@ -645,6 +641,8 @@ async function submitCustomRequest(e) {
 
 async function renderContact() {
     const contact = await getContactInfo();
+    const igHandle = contact.instagram_handle || '';
+    const igUrl = contact.instagram_url || (`https://www.instagram.com/${igHandle}`);
     let html = `
         <h2 class="section-title">Get In Touch</h2>
         <div class="contact-grid">
@@ -664,6 +662,15 @@ async function renderContact() {
                         <p style="color: var(--text-muted);">${contact.phone}</p>
                     </div>
                 </div>
+                ${igHandle ? `
+                <a href="${igUrl}" target="_blank" rel="noopener noreferrer" class="contact-card">
+                    <div class="contact-icon instagram"><i class="fa-brands fa-instagram"></i></div>
+                    <div>
+                        <h3>Instagram</h3>
+                        <p style="color: var(--text-muted);">@${igHandle}</p>
+                    </div>
+                </a>
+                ` : ''}
             </div>
             
             <div class="form-container" style="margin: 0; max-width: 100%;">
