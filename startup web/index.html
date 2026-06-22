@@ -27,13 +27,13 @@
                 <i class="fa-solid fa-bars"></i>
             </div>
             <ul class="nav-links" id="nav-links">
-                <li><a href="javascript:void(0)" onclick="navigateTo('home')">Home</a></li>
-                <li><a href="javascript:void(0)" onclick="navigateTo('projects')">Browse Projects</a></li>
-                <li><a href="javascript:void(0)" onclick="navigateTo('custom')">Custom Request</a></li>
-                <li><a href="javascript:void(0)" onclick="navigateTo('contact')">Contact</a></li>
-                <li id="admin-dash-link" style="display: none;"><a href="https://creator-in-admin.vercel.app/" target="_blank" class="nav-btn" style="background: var(--secondary-color); color: white;">Admin Dashboard</a></li>
+                <li><a id="nav-link-home" href="javascript:void(0)" onclick="navigateTo('home')">Home</a></li>
+                <li><a id="nav-link-projects" href="javascript:void(0)" onclick="navigateTo('projects')">Browse Projects</a></li>
+                <li><a id="nav-link-custom" href="javascript:void(0)" onclick="navigateTo('custom')">Custom Request</a></li>
+                <li><a id="nav-link-contact" href="javascript:void(0)" onclick="navigateTo('contact')">Contact</a></li>
+                <li id="admin-dash-link" style="display: none;"><a id="nav-link-admin-dash" href="https://creator-in-admin.vercel.app/" target="_blank" class="nav-btn" style="background: var(--secondary-color); color: white;">Admin Dashboard</a></li>
                 <li><a href="javascript:void(0)" class="nav-btn" id="login-nav-btn" onclick="navigateTo('login')">Login</a></li>
-                <li><a href="#" class="nav-btn" id="logout-nav-btn" onclick="handleLogout(event)" style="display: none;">Logout</a></li>
+                <li><a href="javascript:void(0)" class="nav-btn" id="logout-nav-btn" onclick="handleLogout(event)" style="display: none;">Logout</a></li>
             </ul>
         </div>
     </nav>
@@ -69,32 +69,22 @@
             <div class="footer-section links">
                 <h3>Quick Links</h3>
                 <ul>
-                    <li><a href="#home" onclick="navigateTo('home')">Home</a></li>
-                    <li><a href="#projects" onclick="navigateTo('projects')">Projects</a></li>
-                    <li><a href="#custom" onclick="navigateTo('custom')">Custom Request</a></li>
-                    <li><a href="#contact" onclick="navigateTo('contact')">Contact</a></li>
+                    <li><a id="footer-link-home" href="#home" onclick="navigateTo('home')">Home</a></li>
+                    <li><a id="footer-link-projects" href="#projects" onclick="navigateTo('projects')">Browse Projects</a></li>
+                    <li><a id="footer-link-custom" href="#custom" onclick="navigateTo('custom')">Custom Request</a></li>
+                    <li><a id="footer-link-contact" href="#contact" onclick="navigateTo('contact')">Contact</a></li>
                 </ul>
             </div>
             <div class="footer-section contact-info">
                 <h3>Contact Us</h3>
                 <p><i class="fa-solid fa-envelope"></i> <span id="footer-email">support@creators.in</span></p>
                 <p><i class="fa-brands fa-whatsapp"></i> <span id="footer-phone">+91 98765 43210</span></p>
-                <div class="socials">
-                    <a href="#"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="#"><i class="fa-brands fa-linkedin"></i></a>
-                    <a href="#"><i class="fa-brands fa-youtube"></i></a>
-                </div>
             </div>
         </div>
         <div class="footer-bottom">
             <p>&copy; 2026 CREATORS.IN. All rights reserved.</p>
         </div>
     </footer>
-
-    <!-- Floating WhatsApp Button -->
-    <a href="#" class="floating-whatsapp" id="floating-wa" target="_blank" aria-label="Chat on WhatsApp">
-        <i class="fa-brands fa-whatsapp"></i>
-    </a>
 
     <!-- Scripts -->
     <!-- Firebase SDKs -->

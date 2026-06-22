@@ -40,8 +40,8 @@ async function navigateTo(route, param = null, pushState = true) {
     const adminNav = document.querySelector('.admin-navbar .nav-links');
     if (adminNav) adminNav.classList.remove('show');
 
-    const protectedRoutes = []; // Admin routes removed
-    if (!isAuthenticated && route !== 'login' && route !== 'home') {
+    const publicRoutes = ['home', 'projects', 'custom', 'contact', 'detail', 'login'];
+    if (!isAuthenticated && !publicRoutes.includes(route)) {
         route = 'login';
     }
 
@@ -96,8 +96,8 @@ async function navigateTo(route, param = null, pushState = true) {
     // Update active nav link
     document.querySelectorAll('.nav-links a').forEach(link => {
         link.classList.remove('active');
-        const href = link.getAttribute('href');
-        if (href === `#${route}` || (route === 'admin-login' && href === '#login')) {
+        const onclickAttr = link.getAttribute('onclick');
+        if (onclickAttr && onclickAttr.includes(`navigateTo('${route}'`)) {
             link.classList.add('active');
         }
     });
@@ -112,6 +112,8 @@ async function navigateTo(route, param = null, pushState = true) {
         await routes[route](param);
     }
 }
+
+window.navigateTo = navigateTo;
 
 window.onpopstate = function (event) {
     if (event.state) {
@@ -139,6 +141,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const initialRoute = hash.split('-')[0] || 'home';
         const initialParam = hash.split('-')[1] || null;
 
+        const publicRoutes = ['home', 'projects', 'custom', 'contact', 'detail', 'login'];
+
         if (user) {
             isAuthenticated = true;
             // Check if user is admin
@@ -152,7 +156,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             isAuthenticated = false;
             userRole = null;
             // Allow public routes, otherwise go to login
-            if (['login', 'home'].includes(initialRoute)) {
+            if (publicRoutes.includes(initialRoute)) {
                 await navigateTo(initialRoute, initialParam);
             } else {
                 navigateTo('login');
@@ -199,34 +203,6 @@ function createGradientBGHTML() {
 
 function renderLogin(isSignup = false) {
     let html = '';
-
-    const howItWorksHTML = `
-        <section class="how-it-works on-dark" style="margin-top: 4rem;">
-            <h2 class="section-title">Service Provider</h2>
-            <div class="steps">
-                <div class="step-card">
-                    <div class="step-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
-                    <h3>1. Choose or Request</h3>
-                    <p>Browse our collection of ready-made projects or submit a custom requirement.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-icon"><i class="fa-solid fa-sliders"></i></div>
-                    <h3>2. Customize & Confirm</h3>
-                    <p>Discuss the details, get a price estimate, and customize components as needed.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-icon"><i class="fa-solid fa-truck-fast"></i></div>
-                    <h3>3. Fast Delivery</h3>
-                    <p>Receive your complete project with code, components, and documentation quickly.</p>
-                </div>
-                <div class="step-card">
-                    <div class="step-icon"><i class="fa-solid fa-file-pdf"></i></div>
-                    <h3>4. Reports & Softcopy</h3>
-                    <p>We design and develop academic projects tailored to your requirements and provide a complete project report in soft copy, ready for submission.</p>
-                </div>
-            </div>
-        </section>
-    `;
 
     html = `
         ${createGradientBGHTML()}
@@ -279,7 +255,31 @@ function renderLogin(isSignup = false) {
                 </button>
             </form>
         </div>
-        ${howItWorksHTML}
+        <section class="how-it-works on-dark" style="margin-top: 4rem;">
+            <h2 class="section-title">Service Provider</h2>
+            <div class="steps">
+                <div class="step-card">
+                    <div class="step-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                    <h3>1. Choose or Request</h3>
+                    <p>Browse our collection of ready-made projects or submit a custom requirement.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-icon"><i class="fa-solid fa-sliders"></i></div>
+                    <h3>2. Customize &amp; Confirm</h3>
+                    <p>Discuss the details, get a price estimate, and customize components as needed.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-icon"><i class="fa-solid fa-truck-fast"></i></div>
+                    <h3>3. Fast Delivery</h3>
+                    <p>Receive your complete project with code, components, and documentation quickly.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-icon"><i class="fa-solid fa-file-pdf"></i></div>
+                    <h3>4. Reports &amp; Softcopy</h3>
+                    <p>We design and develop academic projects tailored to your requirements and provide a complete project report in soft copy, ready for submission.</p>
+                </div>
+            </div>
+        </section>
     `;
     appContent.innerHTML = html;
 }
@@ -343,7 +343,8 @@ function handleLogout(e) {
 
 async function renderHome() {
     const currentProjects = await getProjects();
-    const featuredProjects = currentProjects.slice(0, 3);
+    const ongoingProjects = currentProjects.filter(p => !p.status || p.status.toLowerCase() !== 'completed');
+    const finishedProjects = currentProjects.filter(p => p.status && p.status.toLowerCase() === 'completed');
 
     let html = `
         <section class="hero">
@@ -353,11 +354,11 @@ async function renderHome() {
                     <h1>Get Your Academic Projects Done &nbsp;&bull;&nbsp;</h1>
                 </div>
             </div>
-            <p>Fast, Affordable, Reliable. Specially designed for EEE, ECE, CSE, and Mechanical Engineering students.</p>
-            <div class="hero-ctas">
-                <button class="btn btn-primary" onclick="navigateTo('projects')">Browse Projects</button>
-                <button class="btn btn-outline" onclick="navigateTo('custom')">Request Custom Project</button>
-            </div>
+            <p style="font-size: 1.35rem; font-weight: 700; line-height: 1.6; letter-spacing: 0.3px;">
+                <span style="color: var(--primary-color);">Smart Solutions</span> for Every Engineering Department.<br>
+                <span style="font-size: 1.1rem; font-weight: 500; opacity: 0.85;">Efficient, Affordable, and Future-Ready.</span>
+            </p>
+
             <div class="marquee-container" style="margin-top: 3rem;">
                 <div class="marquee-content" style="animation-duration: 40s;">
                     <div class="trust-badges">
@@ -384,7 +385,7 @@ async function renderHome() {
                 </div>
                 <div class="step-card">
                     <div class="step-icon"><i class="fa-solid fa-sliders"></i></div>
-                    <h3>2. Customize & Confirm</h3>
+                    <h3>2. Customize &amp; Confirm</h3>
                     <p>Discuss the details, get a price estimate, and customize components as needed.</p>
                 </div>
                 <div class="step-card">
@@ -394,16 +395,23 @@ async function renderHome() {
                 </div>
                 <div class="step-card">
                     <div class="step-icon"><i class="fa-solid fa-file-pdf"></i></div>
-                    <h3>4. Reports & Softcopy</h3>
+                    <h3>4. Reports &amp; Softcopy</h3>
                     <p>We design and develop academic projects tailored to your requirements and provide a complete project report in soft copy, ready for submission.</p>
                 </div>
             </div>
         </section>
 
         <section class="featured-projects mb-4">
-            <h2 class="section-title">Featured Projects</h2>
+            <h2 class="section-title">Ongoing Projects</h2>
             <div class="projects-grid">
-                ${featuredProjects.map(createProjectCardHTML).join('')}
+                ${ongoingProjects.length > 0 ? ongoingProjects.map(createProjectCardHTML).join('') : '<p class="text-center w-100" style="grid-column: 1/-1;">No ongoing projects at the moment.</p>'}
+            </div>
+        </section>
+
+        <section class="featured-projects mb-4" style="margin-top: 5rem;">
+            <h2 class="section-title">Finished Projects</h2>
+            <div class="projects-grid">
+                ${finishedProjects.length > 0 ? finishedProjects.map(createProjectCardHTML).join('') : '<p class="text-center w-100" style="grid-column: 1/-1;">No finished projects at the moment.</p>'}
             </div>
             <div class="text-center mt-4">
                 <button class="btn btn-primary" onclick="navigateTo('projects')">View All Projects</button>
@@ -436,10 +444,22 @@ async function renderProjects() {
             <input type="text" id="project-search" placeholder="Search for projects..." value="${searchQuery}">
         </div>
 
-        <div class="filters">
-            ${categories.map(cat => `
-                <button class="filter-btn ${currentFilter === cat ? 'active' : ''}" onclick="setFilter('${cat}')">${cat}</button>
-            `).join('')}
+        <div class="filters-container">
+            <!-- Desktop filter buttons -->
+            <div class="filters-desktop">
+                ${categories.map(cat => `
+                    <button class="filter-btn ${currentFilter === cat ? 'active' : ''}" onclick="setFilter('${cat}')">${cat}</button>
+                `).join('')}
+            </div>
+            <!-- Mobile filter select dropdown -->
+            <div class="filters-mobile" style="margin-bottom: 2rem;">
+                <label for="mobile-filter-select" style="font-weight: 600; margin-bottom: 0.5rem; display: block; text-align: center;">Filter by Department:</label>
+                <select id="mobile-filter-select" class="form-control" onchange="setFilter(this.value)" style="height: 48px; border-radius: 8px;">
+                    ${categories.map(cat => `
+                        <option value="${cat}" ${currentFilter === cat ? 'selected' : ''}>${cat === 'All' ? 'All Departments' : cat}</option>
+                    `).join('')}
+                </select>
+            </div>
         </div>
 
         <div class="projects-grid">
@@ -449,7 +469,11 @@ async function renderProjects() {
 
     appContent.innerHTML = html;
 
-    document.getElementById('project-search').addEventListener('input', (e) => {
+    const searchInput = document.getElementById('project-search');
+    searchInput.focus();
+    searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+
+    searchInput.addEventListener('input', (e) => {
         searchQuery = e.target.value;
         clearTimeout(window.searchTimeout);
         window.searchTimeout = setTimeout(renderProjects, 300);
@@ -462,15 +486,20 @@ function setFilter(cat) {
 }
 
 function createProjectCardHTML(project) {
+    const isCompleted = project.status && project.status.toLowerCase() === 'completed';
+    const displayPrice = String(project.price).startsWith('₹') ? project.price : `₹${project.price}`;
     return `
         <div class="project-card">
             <img src="${project.image}" alt="${project.title}" class="project-img">
             <div class="project-content">
-                <span class="project-category">${project.category}</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <span class="project-category">${project.category}</span>
+                    <span class="project-status-badge" style="padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; background: ${isCompleted ? 'rgba(25, 135, 84, 0.1)' : 'rgba(13, 110, 253, 0.1)'}; color: ${isCompleted ? '#198754' : '#0d6efd'}; border: 1px solid ${isCompleted ? 'rgba(25, 135, 84, 0.2)' : 'rgba(13, 110, 253, 0.2)'};">${isCompleted ? 'Finished' : 'Ongoing'}</span>
+                </div>
                 <h3 class="project-title">${project.title}</h3>
-                <p class="project-desc">${project.shortDesc}</p>
+                <p class="project-desc">${project.shortDesc || ''}</p>
                 <div class="project-footer">
-                    <span class="project-price">${project.price}</span>
+                    <span class="project-price">${displayPrice}</span>
                     <button class="btn btn-outline" onclick="navigateTo('detail', '${project.id}')">View Details</button>
                 </div>
             </div>
@@ -483,6 +512,8 @@ async function renderProjectDetail(id) {
     const project = projects.find(p => String(p.id) === String(id));
     if (!project) return navigateTo('projects');
     const contact = await getContactInfo();
+    const isCompleted = project.status && project.status.toLowerCase() === 'completed';
+    const displayPrice = String(project.price).startsWith('₹') ? project.price : `₹${project.price}`;
 
     let html = `
         <button class="btn btn-outline mb-4" onclick="navigateTo('projects')"><i class="fa-solid fa-arrow-left"></i> Back to Projects</button>
@@ -491,9 +522,12 @@ async function renderProjectDetail(id) {
                 <img src="${project.image}" alt="${project.title}" class="detail-img">
             </div>
             <div class="detail-info">
-                <span class="project-category">${project.category}</span>
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem;">
+                    <span class="project-category">${project.category}</span>
+                    <span class="project-status-badge" style="padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; background: ${isCompleted ? 'rgba(25, 135, 84, 0.1)' : 'rgba(13, 110, 253, 0.1)'}; color: ${isCompleted ? '#198754' : '#0d6efd'}; border: 1px solid ${isCompleted ? 'rgba(25, 135, 84, 0.2)' : 'rgba(13, 110, 253, 0.2)'};">${isCompleted ? 'Finished' : 'Ongoing'}</span>
+                </div>
                 <h1>${project.title}</h1>
-                <div class="detail-price">${project.price} <span style="font-size: 1rem; color: #6c757d; font-weight: 400;">(Estimated)</span></div>
+                <div class="detail-price">${displayPrice} <span style="font-size: 1rem; color: #6c757d; font-weight: 400;">(Estimated)</span></div>
                 
                 <div class="detail-section">
                     <h3>Description</h3>
@@ -549,6 +583,17 @@ function renderCustomRequest() {
                     </select>
                 </div>
                 <div class="form-group">
+                    <label>Project Type</label>
+                    <select id="req-type" class="form-control" required>
+                        <option value="">Select Project Type</option>
+                        <option value="Hardware / Prototype">Hardware / Prototype</option>
+                        <option value="Software / Simulation">Software / Simulation</option>
+                        <option value="IoT / Embedded System">IoT / Embedded System</option>
+                        <option value="MATLAB / VLSI / Labview">MATLAB / VLSI / Labview</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>Project Description & Requirements</label>
                     <textarea id="req-desc" class="form-control" required placeholder="Describe what you want to build..."></textarea>
                 </div>
@@ -556,7 +601,7 @@ function renderCustomRequest() {
                     <label>Estimated Budget (₹)</label>
                     <input type="number" id="req-budget" class="form-control" placeholder="e.g. 4000">
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;"><i class="fa-solid fa-paper-plane"></i> Submit Request</button>
+                <button type="submit" id="custom-req-submit-btn" class="btn btn-primary" style="width: 100%; height: 48px;"><i class="fa-solid fa-paper-plane"></i> Submit Request</button>
             </form>
         </div>
     `;
@@ -565,18 +610,29 @@ function renderCustomRequest() {
 
 async function submitCustomRequest(e) {
     e.preventDefault();
-    const newReq = {
-        name: document.getElementById('req-name').value,
-        email: document.getElementById('req-email').value,
-        phone: document.getElementById('req-phone').value,
-        branch: document.getElementById('req-branch').value,
-        desc: document.getElementById('req-desc').value,
-        budget: document.getElementById('req-budget').value
-    };
+    const btn = document.getElementById('custom-req-submit-btn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...'; }
+    try {
+        const newReq = {
+            name: document.getElementById('req-name').value,
+            email: document.getElementById('req-email').value,
+            phone: document.getElementById('req-phone').value,
+            branch: document.getElementById('req-branch').value,
+            type: document.getElementById('req-type').value,
+            projectType: document.getElementById('req-type').value,
+            desc: document.getElementById('req-desc').value,
+            budget: document.getElementById('req-budget').value
+        };
 
-    await addRequest(newReq);
-
-    navigateTo('home');
+        await addRequest(newReq);
+        alert('Your custom project request has been submitted successfully! We will get in touch with you shortly.');
+        navigateTo('home');
+    } catch (err) {
+        console.error(err);
+        alert('Failed to submit request: ' + err.message);
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Request'; }
+    }
 }
 
 async function renderContact() {
@@ -585,13 +641,7 @@ async function renderContact() {
         <h2 class="section-title">Get In Touch</h2>
         <div class="contact-grid">
             <div class="contact-cards">
-                <a href="https://wa.me/${contact.whatsapp}?text=${encodeURIComponent("HI WE ARE CREATORS.IN HOW WE CAN GIVE OUR SUPPORT FOR YOU")}" target="_blank" class="contact-card">
-                    <div class="contact-icon whatsapp"><i class="fa-brands fa-whatsapp"></i></div>
-                    <div>
-                        <h3>Chat on WhatsApp</h3>
-                        <p style="color: var(--text-muted);">Instant replies</p>
-                    </div>
-                </a>
+
                 <a href="mailto:${contact.email}" class="contact-card">
                     <div class="contact-icon email"><i class="fa-solid fa-envelope"></i></div>
                     <div>
@@ -607,12 +657,169 @@ async function renderContact() {
                     </div>
                 </div>
             </div>
+            
+            <div class="form-container" style="margin: 0; max-width: 100%;">
+                <h3 style="margin-bottom: 1.5rem;">Send Us a Message</h3>
+                <form id="contact-form" onsubmit="submitContactForm(event)">
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="contact-name" class="form-control" required placeholder="Your Name">
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input type="email" id="contact-email" class="form-control" required placeholder="Your Email">
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea id="contact-message" class="form-control" required placeholder="How can we help you?"></textarea>
+                    </div>
+                    <button type="submit" id="contact-submit-btn" class="btn btn-primary" style="width: 100%; height: 48px;"><i class="fa-solid fa-paper-plane"></i> Send Message</button>
+                </form>
+            </div>
         </div>
     `;
     appContent.innerHTML = html;
 }
 
+window.submitContactForm = async function (e) {
+    e.preventDefault();
+    const btn = document.getElementById('contact-submit-btn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending...'; }
+    try {
+        const contactMsg = {
+            name: document.getElementById('contact-name').value,
+            email: document.getElementById('contact-email').value,
+            message: document.getElementById('contact-message').value,
+            createdAt: new Date().toLocaleDateString()
+        };
+        await db.collection('contact_messages').add(contactMsg);
+        alert('Thank you for contacting us! We will get back to you soon.');
+        document.getElementById('contact-form').reset();
+    } catch (err) {
+        console.error(err);
+        alert('Failed to send message: ' + err.message);
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Message'; }
+    }
+};
+
 function toggleFaq(el) {
     const item = el.parentElement;
     item.classList.toggle('active');
+}
+
+function renderAbout() {
+    let html = `
+        <section class="about-hero" style="text-align: center; padding: 4rem 1rem; background: var(--bg-gradient); border-radius: var(--border-radius); margin-bottom: 4rem; border: 1px solid rgba(255,255,255,0.2);">
+            <h2 class="section-title" style="margin-bottom: 2rem;">About CREATORS.IN</h2>
+            <p style="font-size: 1.25rem; color: var(--text-muted); max-width: 800px; margin: 0 auto 2rem; line-height: 1.8;">
+                We are a team of passionate engineers and educators dedicated to helping engineering students turn their academic ideas into high-quality working prototypes. Since our inception, we have helped over 100+ students succeed in their project submissions and vivas.
+            </p>
+            <div style="display: flex; justify-content: center; gap: 2rem; flex-wrap: wrap;">
+                <div style="background: white; padding: 1.5rem 2rem; border-radius: 12px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-graduation-cap" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+                    <span style="font-weight: 700;">Academic Excellence</span>
+                </div>
+                <div style="background: white; padding: 1.5rem 2rem; border-radius: 12px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-laptop-code" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+                    <span style="font-weight: 700;">Hands-on Support</span>
+                </div>
+                <div style="background: white; padding: 1.5rem 2rem; border-radius: 12px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="fa-solid fa-trophy" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+                    <span style="font-weight: 700;">100% Viva Ready</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="about-services" style="margin-bottom: 4rem;">
+            <h2 class="section-title">What We Offer</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+                <div class="about-card" style="background: white; padding: 2.5rem 2rem; border-radius: var(--border-radius); box-shadow: var(--shadow-md); text-align: center;">
+                    <div style="font-size: 2.5rem; color: var(--primary-color); margin-bottom: 1.5rem;"><i class="fa-solid fa-microchip"></i></div>
+                    <h3 style="margin-bottom: 1rem;">Complete Hardware Kits</h3>
+                    <p style="color: var(--text-muted);">Fully assembled and tested electronics/mechanical systems built with high-quality components.</p>
+                </div>
+                <div class="about-card" style="background: white; padding: 2.5rem 2rem; border-radius: var(--border-radius); box-shadow: var(--shadow-md); text-align: center;">
+                    <div style="font-size: 2.5rem; color: var(--primary-color); margin-bottom: 1.5rem;"><i class="fa-solid fa-code"></i></div>
+                    <h3 style="margin-bottom: 1rem;">Clean & Commented Code</h3>
+                    <p style="color: var(--text-muted);">Well-structured and thoroughly commented code files in Arduino C, Python, MATLAB, etc. for easy learning.</p>
+                </div>
+                <div class="about-card" style="background: white; padding: 2.5rem 2rem; border-radius: var(--border-radius); box-shadow: var(--shadow-md); text-align: center;">
+                    <div style="font-size: 2.5rem; color: var(--primary-color); margin-bottom: 1.5rem;"><i class="fa-solid fa-file-invoice"></i></div>
+                    <h3 style="margin-bottom: 1rem;">Professional Reports</h3>
+                    <p style="color: var(--text-muted);">Comprehensive project reports and documentation (soft copy) prepared strictly according to university guidelines.</p>
+                </div>
+                <div class="about-card" style="background: white; padding: 2.5rem 2rem; border-radius: var(--border-radius); box-shadow: var(--shadow-md); text-align: center;">
+                    <div style="font-size: 2.5rem; color: var(--primary-color); margin-bottom: 1.5rem;"><i class="fa-solid fa-chalkboard-user"></i></div>
+                    <h3 style="margin-bottom: 1rem;">Viva Explanation & Prep</h3>
+                    <p style="color: var(--text-muted);">Exclusive 1-on-1 explanation sessions to prepare you for critical queries during your project viva voce.</p>
+                </div>
+            </div>
+        </section>
+    `;
+    appContent.innerHTML = html;
+}
+
+function renderPricing() {
+    let html = `
+        <h2 class="section-title">Pricing Packages</h2>
+        <p style="text-align: center; color: var(--text-muted); max-width: 600px; margin: -2rem auto 3rem; font-size: 1.1rem;">
+            Affordable tiers tailored to your department and academic requirement. Select the best package for your needs.
+        </p>
+        
+        <div class="pricing-grid">
+            <!-- Standard Plan -->
+            <div class="pricing-card">
+                <h3>Mini Project Standard</h3>
+                <p class="plan-subtitle">Ideal for semester-end submissions</p>
+                <div class="plan-price">
+                    ₹2,999<span> onwards</span>
+                </div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-circle-check"></i> Working Circuit & Prototype</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Complete Code File</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Circuit / Connection Diagram</li>
+                    <li style="color: var(--text-muted);"><i class="fa-solid fa-circle-xmark" style="color: #dc3545;"></i> Full Viva Explanation</li>
+                    <li style="color: var(--text-muted);"><i class="fa-solid fa-circle-xmark" style="color: #dc3545;"></i> Detailed Project Report</li>
+                </ul>
+                <button class="btn btn-outline" onclick="navigateTo('custom')">Request This Plan</button>
+            </div>
+
+            <!-- Pro Plan (Popular) -->
+            <div class="pricing-card popular">
+                <div class="popular-badge">Most Popular</div>
+                <h3>Final Year Pro</h3>
+                <p class="plan-subtitle">Perfect for major project submission</p>
+                <div class="plan-price">
+                    ₹5,999<span> onwards</span>
+                </div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-circle-check"></i> High-end Sensors/Actuators</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Complete Code & App/Cloud Integration</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Ready-to-Submit Softcopy Report</li>
+                    <li><i class="fa-solid fa-circle-check"></i> 1-on-1 Online Viva Prep Session</li>
+                    <li><i class="fa-solid fa-circle-check"></i> 3 Months Component Support</li>
+                </ul>
+                <button class="btn btn-primary" onclick="navigateTo('custom')">Request This Plan</button>
+            </div>
+
+            <!-- Custom Plan -->
+            <div class="pricing-card">
+                <h3>Custom Research</h3>
+                <p class="plan-subtitle">Designed strictly to your requirements</p>
+                <div class="plan-price">
+                    ₹8,999<span> onwards</span>
+                </div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-circle-check"></i> Customizable Hardware & Simulation</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Fully custom code or MATLAB model</li>
+                    <li><i class="fa-solid fa-circle-check"></i> IEEE Paper Reference Integration</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Unlimited Viva Prep & Support</li>
+                    <li><i class="fa-solid fa-circle-check"></i> Support until final evaluation</li>
+                </ul>
+                <button class="btn btn-outline" onclick="navigateTo('custom')">Contact for Estimate</button>
+            </div>
+        </div>
+    `;
+    appContent.innerHTML = html;
 }
